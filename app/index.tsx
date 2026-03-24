@@ -151,13 +151,25 @@ export default function HomeScreen() {
     }
   }
 
+  const RATE_CAVEATS: Record<string, string> = {
+    'Conventional': '780 FICO, 20% down, $300K purchase, 30yr fixed',
+    'FHA': '780 FICO, 5% down, $300K purchase, 30yr fixed, incl. MIP',
+    'VA': '780 FICO, 0% down, $300K purchase, 30yr fixed, exempt',
+    'USDA': 'Coming soon',
+    'Jumbo': 'Coming soon',
+    'Non-QM': 'Coming soon',
+  };
+
   function renderRateRow(label: string, data?: { rate: number; apr: number }) {
     if (!data) return null;
     return (
-      <View style={styles.rateRow}>
-        <Text style={styles.rateLabel}>{label}</Text>
-        <Text style={styles.rateValue}>{data.rate.toFixed(3)}%</Text>
-        <Text style={styles.rateApr}>{data.apr.toFixed(3)}% APR</Text>
+      <View style={styles.rateRowBlock}>
+        <View style={styles.rateRow}>
+          <Text style={styles.rateLabel}>{label}</Text>
+          <Text style={styles.rateValue}>{data.rate.toFixed(3)}%</Text>
+          <Text style={styles.rateApr}>APR {data.apr ? data.apr.toFixed(2) + '%' : 'N/A'}</Text>
+        </View>
+        <Text style={styles.rateCaveat}>{RATE_CAVEATS[label] || ''}</Text>
       </View>
     );
   }
@@ -318,6 +330,9 @@ export default function HomeScreen() {
               {renderRateRow('Jumbo', rates.jumbo)}
               {renderRateRow('Non-QM', rates.nonqm)}
             </View>
+            <Text style={styles.rateDisclaimer}>
+              * Rates/APR based on current day market, subject to change without notice. Rates shown are for informational purposes only and do not constitute a loan commitment. Actual rates may vary based on borrower qualifications, property type, and market conditions. Contact a loan officer for a personalized quote.
+            </Text>
           </>
         ) : (
           <Text style={styles.noRates}>Rates coming soon!</Text>
@@ -536,6 +551,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.textSecondary,
     textAlign: 'right',
+  },
+  rateRowBlock: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  rateCaveat: {
+    fontSize: 11,
+    color: Colors.textSecondary,
+    paddingBottom: 8,
+    fontStyle: 'italic',
+  },
+  rateDisclaimer: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+    marginTop: 12,
+    lineHeight: 14,
+    fontStyle: 'italic',
   },
   noRates: {
     fontSize: 15,
