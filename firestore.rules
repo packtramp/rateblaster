@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Subscribers - client can create (signup) and update active field (unsubscribe)
+    match /subscribers/{doc} {
+      allow create: if request.resource.data.keys().hasAll(['email', 'active']);
+      allow read: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['active', 'unsubscribedAt']);
+      allow delete: if false;
+    }
+    // Rates - anyone can read (public display), only server writes
+    match /rates/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
