@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import {
   collection,
-  addDoc,
+  doc,
+  setDoc,
   query,
   orderBy,
   limit,
@@ -38,6 +39,7 @@ interface RateData {
 export default function HomeScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [zip, setZip] = useState('');
   const [honeypot, setHoneypot] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>(DEFAULT_CHECKED);
@@ -84,6 +86,11 @@ export default function HomeScreen() {
       return;
     }
 
+    if (!phone.trim() || phone.trim().replace(/\D/g, '').length < 10) {
+      setError('Phone number is required (10 digits).');
+      return;
+    }
+
     if (selectedTypes.length === 0) {
       setError('Select at least one rate type.');
       return;
@@ -102,15 +109,40 @@ export default function HomeScreen() {
     }
 
     try {
-      await addDoc(collection(db, 'subscribers'), {
+      const emailKey = email.trim().toLowerCase();
+      const emailDomain = emailKey.split('@')[1] || '';
+
+      // Competitor domains to flag
+      const COMPETITOR_DOMAINS = [
+        'rocketmortgage.com', 'quickenloans.com', 'uwm.com', 'unitedwholesale.com',
+        'loanDepot.com', 'loandepot.com', 'wellsfargo.com', 'chase.com', 'bankofamerica.com',
+        'caliberhomeloans.com', 'pennymac.com', 'freedommortgage.com', 'newrez.com',
+        'flagstar.com', 'crosscountry.com', 'Movement.com', 'movement.com',
+        'fairwaymc.com', 'guildmortgage.com', 'homepoint.com',
+      ];
+      const isCompetitor = COMPETITOR_DOMAINS.some(d => emailDomain.toLowerCase() === d.toLowerCase());
+
+      await setDoc(doc(db, 'subscribers', emailKey), {
         name: name.trim(),
-        email: email.trim().toLowerCase(),
+        email: emailKey,
+        phone: phone.trim(),
         zip: zip.trim(),
         rateTypes: selectedTypes,
         active: true,
+        flagged: isCompetitor,
         createdAt: serverTimestamp(),
-        honeypot: '',
-      });
+      }, { merge: true });
+
+      // Alert Roby if competitor signs up
+      if (isCompetitor) {
+        try {
+          await fetch('/api/alert', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailKey, name: name.trim(), domain: emailDomain }),
+          });
+        } catch {} // Silent — don't block signup
+      }
       setSubmitted(true);
     } catch (err) {
       setError('Something went wrong. Please try again.');
@@ -177,6 +209,19 @@ export default function HomeScreen() {
                 placeholderTextColor={Colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Phone Number *</Text>
+              <TextInput
+                style={styles.input}
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="(256) 555-1234"
+                placeholderTextColor={Colors.textSecondary}
+                keyboardType="phone-pad"
+                maxLength={14}
               />
             </View>
 
