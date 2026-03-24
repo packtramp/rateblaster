@@ -156,9 +156,9 @@ export default function HomeScreen() {
     'Conventional': '780 FICO, 20% down, $300K purchase, 30yr fixed',
     'FHA': '780 FICO, 5% down, $300K purchase, 30yr fixed, incl. MIP',
     'VA': '780 FICO, 0% down, $300K purchase, 30yr fixed, exempt',
-    'USDA': 'Coming soon',
-    'Jumbo': 'Coming soon',
-    'Non-QM': 'Coming soon',
+    'USDA': '780 FICO, 0% down, $300K purchase, 30yr fixed, incl. guarantee fee',
+    'Jumbo': '780 FICO, 20% down, $1,062,500 purchase, 30yr fixed',
+    'Non-QM': '780 FICO, 20% down, $375K purchase, 30yr fixed, full doc',
   };
 
   function renderRateRow(label: string, data?: { rate: number; apr: number }) {
