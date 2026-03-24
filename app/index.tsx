@@ -53,7 +53,7 @@ export default function HomeScreen() {
 
   async function fetchLatestRates() {
     try {
-      const q = query(collection(db, 'rates'), orderBy('date', 'desc'), limit(1));
+      const q = query(collection(db, 'rateHistory'), orderBy('date', 'desc'), limit(1));
       const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         setRates(snapshot.docs[0].data() as RateData);
