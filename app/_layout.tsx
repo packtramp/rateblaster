@@ -19,6 +19,10 @@ export default function RootLayout() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="history"
+          options={{ title: 'Rate History' }}
+        />
+        <Stack.Screen
           name="unsubscribe"
           options={{ title: 'Unsubscribe' }}
         />

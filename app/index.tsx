@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import { router } from 'expo-router';
 import {
   collection,
   doc,
@@ -339,6 +340,15 @@ export default function HomeScreen() {
         )}
       </View>
 
+      {/* Rate History Button */}
+      <TouchableOpacity
+        style={styles.historyButton}
+        onPress={() => router.push('/history')}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.historyButtonText}>View Rate History</Text>
+      </TouchableOpacity>
+
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
@@ -575,6 +585,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 24,
     fontStyle: 'italic',
+  },
+  historyButton: {
+    borderWidth: 2,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 20,
+    backgroundColor: 'transparent',
+    ...Platform.select({
+      web: {
+        maxWidth: 520,
+        alignSelf: 'center' as const,
+        width: '100%',
+      },
+      default: {},
+    }),
+  },
+  historyButtonText: {
+    color: Colors.accent,
+    fontSize: 16,
+    fontWeight: '700',
   },
   footer: {
     alignItems: 'center',
