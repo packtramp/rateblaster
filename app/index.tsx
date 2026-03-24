@@ -282,9 +282,8 @@ export default function HomeScreen() {
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          Powered by The McAbee Group | NMLS 196893
+          Powered by The McAbee Group | NMLS 196893 (v{VERSION})
         </Text>
-        <Text style={styles.footerVersion}>v{VERSION}</Text>
       </View>
     </ScrollView>
   );
