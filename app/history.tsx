@@ -78,10 +78,12 @@ export default function HistoryScreen() {
   const jumboRates = filteredData.map((e) => e.jumbo?.rate ?? 0);
   const nonqmRates = filteredData.map((e) => e.nonqm?.rate ?? 0);
 
-  // Find min/max for Y-axis
+  // Find min/max for Y-axis — tight bounds with 0.25% padding
   const allRates = [...convRates, ...fhaRates, ...vaRates, ...usdaRates, ...jumboRates, ...nonqmRates].filter((r) => r > 0);
-  const minRate = allRates.length > 0 ? Math.floor(Math.min(...allRates) * 4) / 4 : 5;
-  const maxRate = allRates.length > 0 ? Math.ceil(Math.max(...allRates) * 4) / 4 : 7;
+  const dataMin = allRates.length > 0 ? Math.min(...allRates) : 5;
+  const dataMax = allRates.length > 0 ? Math.max(...allRates) : 7;
+  const minRate = Math.floor((dataMin - 0.25) * 8) / 8;
+  const maxRate = Math.ceil((dataMax + 0.25) * 8) / 8;
 
   function getRateChangeColor(current: number | undefined, previous: number | undefined) {
     if (!current || !previous || current === previous) return {};
@@ -160,12 +162,14 @@ export default function HistoryScreen() {
                   { data: usdaRates, color: () => '#805AD5', strokeWidth: 2 },
                   { data: jumboRates, color: () => '#D53F8C', strokeWidth: 2 },
                   { data: nonqmRates, color: () => '#718096', strokeWidth: 2 },
+                  // Invisible datasets to force Y-axis bounds
+                  { data: [minRate], color: () => 'transparent', strokeWidth: 0, withDots: false },
+                  { data: [maxRate], color: () => 'transparent', strokeWidth: 0, withDots: false },
                 ],
               }}
               width={chartWidth}
-              height={260}
+              height={300}
               yAxisSuffix="%"
-              fromNumber={maxRate}
               fromZero={false}
               chartConfig={{
                 backgroundColor: Colors.surface,
