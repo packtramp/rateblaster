@@ -339,23 +339,24 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {/* Rate History Button */}
-      <TouchableOpacity
-        style={styles.historyButton}
-        onPress={() => router.push('/history')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.historyButtonText}>View Rate History</Text>
-      </TouchableOpacity>
+      {/* Action Buttons */}
+      <View style={styles.buttonCard}>
+        <TouchableOpacity
+          style={styles.historyButton}
+          onPress={() => router.push('/history')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.historyButtonText}>View Rate History</Text>
+        </TouchableOpacity>
 
-      {/* Mortgage Calculator Button — links to Dorsett Group site */}
-      <TouchableOpacity
-        style={styles.calcButton}
-        onPress={() => Linking.openURL('https://www.dorsettgroup.com/mortgage-calculator.html')}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.calcButtonText}>Mortgage Calculator</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.calcButton}
+          onPress={() => Linking.openURL('https://www.dorsettgroup.com/mortgage-calculator.html')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.calcButtonText}>Mortgage Calculator</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Footer */}
       <View style={styles.footer}>
@@ -594,15 +595,10 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     fontStyle: 'italic',
   },
-  historyButton: {
-    borderWidth: 2,
-    borderColor: Colors.accent,
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: 'center',
+  buttonCard: {
     marginHorizontal: 16,
     marginTop: 20,
-    backgroundColor: 'transparent',
+    gap: 10,
     ...Platform.select({
       web: {
         maxWidth: 520,
@@ -611,6 +607,14 @@ const styles = StyleSheet.create({
       },
       default: {},
     }),
+  },
+  historyButton: {
+    borderWidth: 2,
+    borderColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
   historyButtonText: {
     color: Colors.accent,
@@ -622,16 +626,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 14,
     alignItems: 'center',
-    marginHorizontal: 16,
-    marginTop: 10,
-    ...Platform.select({
-      web: {
-        maxWidth: 520,
-        alignSelf: 'center' as const,
-        width: '100%',
-      },
-      default: {},
-    }),
   },
   calcButtonText: {
     color: Colors.textLight,
