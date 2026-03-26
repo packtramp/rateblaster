@@ -596,16 +596,29 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   buttonCard: {
+    backgroundColor: Colors.surface,
     marginHorizontal: 16,
     marginTop: 20,
+    borderRadius: 12,
+    padding: 24,
     gap: 10,
     ...Platform.select({
       web: {
         maxWidth: 520,
         alignSelf: 'center' as const,
         width: '100%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
       },
-      default: {},
+      default: {
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+      },
     }),
   },
   historyButton: {

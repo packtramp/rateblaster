@@ -71,28 +71,26 @@ export default function HistoryScreen() {
     return '';
   });
 
-  // Only include rate types that have historical data (at least 2 entries)
-  const hasUsda = filteredData.filter((e) => e.usda?.rate).length >= 2;
-  const hasJumbo = filteredData.filter((e) => e.jumbo?.rate).length >= 2;
-  const hasNonqm = filteredData.filter((e) => e.nonqm?.rate).length >= 2;
-
-  // For types with sparse data, only chart entries where ALL included types have data
-  const chartData = hasUsda || hasJumbo || hasNonqm
-    ? filteredData
-    : filteredData;
+  // Only show USDA/Jumbo/Non-QM on chart once they have 10+ data points (avoids spike lines)
+  const usdaCount = filteredData.filter((e) => e.usda?.rate).length;
+  const jumboCount = filteredData.filter((e) => e.jumbo?.rate).length;
+  const nonqmCount = filteredData.filter((e) => e.nonqm?.rate).length;
+  const showUsda = usdaCount >= 10;
+  const showJumbo = jumboCount >= 10;
+  const showNonqm = nonqmCount >= 10;
 
   const convRates = filteredData.map((e) => e.conventional?.rate ?? 0);
   const fhaRates = filteredData.map((e) => e.fha?.rate ?? 0);
   const vaRates = filteredData.map((e) => e.va?.rate ?? 0);
 
-  // Find min/max for Y-axis — tight bounds with 0.25% padding
+  // Find min/max for Y-axis — tight bounds with 0.125% padding
   const coreRates = [...convRates, ...fhaRates, ...vaRates].filter((r) => r > 0);
-  const extraRates = [
-    ...(hasUsda ? filteredData.map((e) => e.usda?.rate ?? 0).filter((r) => r > 0) : []),
-    ...(hasJumbo ? filteredData.map((e) => e.jumbo?.rate ?? 0).filter((r) => r > 0) : []),
-    ...(hasNonqm ? filteredData.map((e) => e.nonqm?.rate ?? 0).filter((r) => r > 0) : []),
+  const extraRateVals = [
+    ...(showUsda ? filteredData.map((e) => e.usda?.rate ?? 0).filter((r) => r > 0) : []),
+    ...(showJumbo ? filteredData.map((e) => e.jumbo?.rate ?? 0).filter((r) => r > 0) : []),
+    ...(showNonqm ? filteredData.map((e) => e.nonqm?.rate ?? 0).filter((r) => r > 0) : []),
   ];
-  const allRates = [...coreRates, ...extraRates];
+  const allRates = [...coreRates, ...extraRateVals];
   const dataMin = allRates.length > 0 ? Math.min(...allRates) : 5;
   const dataMax = allRates.length > 0 ? Math.max(...allRates) : 7;
   const minRate = Math.floor((dataMin - 0.125) * 8) / 8;
@@ -151,15 +149,15 @@ export default function HistoryScreen() {
               <View style={[styles.legendDot, { backgroundColor: '#DD6B20' }]} />
               <Text style={styles.legendLabel}>VA</Text>
             </View>
-            {hasUsda && <View style={styles.legendItem}>
+            {showUsda && <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#805AD5' }]} />
               <Text style={styles.legendLabel}>USDA</Text>
             </View>}
-            {hasJumbo && <View style={styles.legendItem}>
+            {showJumbo && <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#D53F8C' }]} />
               <Text style={styles.legendLabel}>Jumbo</Text>
             </View>}
-            {hasNonqm && <View style={styles.legendItem}>
+            {showNonqm && <View style={styles.legendItem}>
               <View style={[styles.legendDot, { backgroundColor: '#718096' }]} />
               <Text style={styles.legendLabel}>Non-QM</Text>
             </View>}
@@ -172,9 +170,9 @@ export default function HistoryScreen() {
                   { data: convRates, color: () => '#3182CE', strokeWidth: 2 },
                   { data: fhaRates, color: () => '#38A169', strokeWidth: 2 },
                   { data: vaRates, color: () => '#DD6B20', strokeWidth: 2 },
-                  ...(hasUsda ? [{ data: filteredData.map((e) => e.usda?.rate || dataMin), color: () => '#805AD5', strokeWidth: 2 }] : []),
-                  ...(hasJumbo ? [{ data: filteredData.map((e) => e.jumbo?.rate || dataMin), color: () => '#D53F8C', strokeWidth: 2 }] : []),
-                  ...(hasNonqm ? [{ data: filteredData.map((e) => e.nonqm?.rate || dataMin), color: () => '#718096', strokeWidth: 2 }] : []),
+                  ...(showUsda ? [{ data: filteredData.map((e) => e.usda?.rate || 0).map((v, i, a) => v || a.find(x => x > 0) || dataMin), color: () => '#805AD5', strokeWidth: 2 }] : []),
+                  ...(showJumbo ? [{ data: filteredData.map((e) => e.jumbo?.rate || 0).map((v, i, a) => v || a.find(x => x > 0) || dataMin), color: () => '#D53F8C', strokeWidth: 2 }] : []),
+                  ...(showNonqm ? [{ data: filteredData.map((e) => e.nonqm?.rate || 0).map((v, i, a) => v || a.find(x => x > 0) || dataMin), color: () => '#718096', strokeWidth: 2 }] : []),
                   // Invisible datasets to force Y-axis bounds
                   { data: [minRate], color: () => 'transparent', strokeWidth: 0, withDots: false },
                   { data: [maxRate], color: () => 'transparent', strokeWidth: 0, withDots: false },
