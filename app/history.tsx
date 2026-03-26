@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Colors } from '../constants/colors';
-import Svg, { Line, Circle, Text as SvgText, Rect } from 'react-native-svg';
+import Svg, { Line, Circle, Text as SvgText, Rect, G } from 'react-native-svg';
 
 interface RateEntry {
   date: string;
@@ -82,7 +82,7 @@ function RateChart({ data, activeKeys, width }: {
 
       {/* Grid lines + Y labels */}
       {yTicks.map((tick, i) => (
-        <View key={`y${i}`}>
+        <G key={`y${i}`}>
           <Line
             x1={padding.left} y1={yScale(tick)}
             x2={padding.left + chartW} y2={yScale(tick)}
@@ -94,7 +94,7 @@ function RateChart({ data, activeKeys, width }: {
           >
             {tick.toFixed(2)}%
           </SvgText>
-        </View>
+        </G>
       ))}
 
       {/* X labels */}
@@ -126,7 +126,7 @@ function RateChart({ data, activeKeys, width }: {
         });
 
         return (
-          <View key={k}>
+          <G key={k}>
             {segments.map((seg, i) => (
               <Line
                 key={`${k}-l${i}`}
@@ -141,7 +141,7 @@ function RateChart({ data, activeKeys, width }: {
                 fill={RATE_COLORS[k]} stroke="#fff" strokeWidth={1}
               />
             ))}
-          </View>
+          </G>
         );
       })}
     </Svg>
