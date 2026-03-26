@@ -356,6 +356,14 @@ export default function HomeScreen() {
         >
           <Text style={styles.calcButtonText}>Mortgage Calculator</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.applyButton}
+          onPress={() => Linking.openURL('https://roby.zipforhome.com/')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.applyButtonText}>Apply Now</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Footer */}
@@ -641,6 +649,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   calcButtonText: {
+    color: Colors.textLight,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  applyButton: {
+    backgroundColor: Colors.success,
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  applyButtonText: {
     color: Colors.textLight,
     fontSize: 16,
     fontWeight: '700',
