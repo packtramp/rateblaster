@@ -19,7 +19,7 @@ interface RateEntry {
   nonqm?: { rate: number; apr?: number };
 }
 
-type TimeRange = '10' | 'q1' | 'q2' | 'q3' | 'q4' | 'ytd' | '6mo' | 'lastyear' | 'all';
+type TimeRange = '10' | '30' | '60' | '90' | 'q4prev' | 'q1' | 'q2' | 'q3' | 'q4' | 'ytd' | '6mo' | 'lastyear' | 'all';
 type RateKey = 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'nonqm';
 
 const RATE_COLORS: Record<RateKey, string> = {
@@ -152,7 +152,7 @@ function RateChart({ data, activeKeys, width }: {
 export default function HistoryScreen() {
   const [allData, setAllData] = useState<RateEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<TimeRange>('ytd');
+  const [range, setRange] = useState<TimeRange>('90');
   const [selected, setSelected] = useState<Record<RateKey, boolean>>({
     conventional: true, fha: true, va: true, usda: true, jumbo: true, nonqm: true,
   });
@@ -176,6 +176,13 @@ export default function HistoryScreen() {
   const filteredData = useMemo(() => {
     if (range === 'all') return allData;
     if (range === '10') return allData.slice(-10);
+    if (range === '30') return allData.slice(-30);
+    if (range === '60') return allData.slice(-60);
+    if (range === '90') return allData.slice(-90);
+    if (range === 'q4prev') {
+      const year = new Date().getFullYear();
+      return allData.filter((e) => e.date >= `${year - 1}-10-01` && e.date <= `${year - 1}-12-31`);
+    }
     const now = new Date();
     const year = now.getFullYear();
     const filterByDateRange = (start: string, end: string) =>
@@ -225,7 +232,11 @@ export default function HistoryScreen() {
       {/* Range Toggle */}
       <View style={s.toggleRow}>
         {([
-          { key: '10' as TimeRange, label: '10 Day' },
+          { key: '10' as TimeRange, label: '10D' },
+          { key: '30' as TimeRange, label: '30D' },
+          { key: '60' as TimeRange, label: '60D' },
+          { key: '90' as TimeRange, label: '90D' },
+          { key: 'q4prev' as TimeRange, label: 'Q4 \'25' },
           { key: 'q1' as TimeRange, label: 'Q1' },
           { key: 'q2' as TimeRange, label: 'Q2' },
           { key: 'ytd' as TimeRange, label: 'YTD' },
