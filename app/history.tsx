@@ -115,9 +115,9 @@ export default function HistoryScreen() {
     conventional: true,
     fha: true,
     va: true,
-    usda: filteredData.filter((e) => e.usda?.rate).length >= 2,
-    jumbo: filteredData.filter((e) => e.jumbo?.rate).length >= 2,
-    nonqm: filteredData.filter((e) => e.nonqm?.rate).length >= 2,
+    usda: filteredData.filter((e) => e.usda?.rate).length >= 1,
+    jumbo: filteredData.filter((e) => e.jumbo?.rate).length >= 1,
+    nonqm: filteredData.filter((e) => e.nonqm?.rate).length >= 1,
   };
 
   const toggleRate = (key: RateKey) => setSelected((p) => ({ ...p, [key]: !p[key] }));
@@ -167,7 +167,7 @@ export default function HistoryScreen() {
           // Only show ranges that have data
           const now = new Date();
           const year = now.getFullYear();
-          if (key === 'q2') return now.getMonth() >= 2; // April+
+          if (key === 'q2') return now.getMonth() >= 1; // April+
           if (key === 'q3') return now.getMonth() >= 6;
           if (key === 'q4') return now.getMonth() >= 9;
           return true;
