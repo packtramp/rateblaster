@@ -350,11 +350,11 @@ export default function HomeScreen() {
 
       {/* Mortgage Calculator Button — links to Dorsett Group site */}
       <TouchableOpacity
-        style={[styles.historyButton, { backgroundColor: '#DD6B20', marginTop: 8 }]}
+        style={styles.calcButton}
         onPress={() => Linking.openURL('https://www.dorsettgroup.com/mortgage-calculator.html')}
         activeOpacity={0.7}
       >
-        <Text style={styles.historyButtonText}>Mortgage Calculator</Text>
+        <Text style={styles.calcButtonText}>Mortgage Calculator</Text>
       </TouchableOpacity>
 
       {/* Footer */}
@@ -614,6 +614,27 @@ const styles = StyleSheet.create({
   },
   historyButtonText: {
     color: Colors.accent,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  calcButton: {
+    backgroundColor: Colors.accent,
+    borderRadius: 8,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginTop: 10,
+    ...Platform.select({
+      web: {
+        maxWidth: 520,
+        alignSelf: 'center' as const,
+        width: '100%',
+      },
+      default: {},
+    }),
+  },
+  calcButtonText: {
+    color: Colors.textLight,
     fontSize: 16,
     fontWeight: '700',
   },
