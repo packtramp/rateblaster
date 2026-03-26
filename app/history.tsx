@@ -26,10 +26,33 @@ interface RateEntry {
 
 type TimeRange = '30' | '60' | 'all';
 
+type RateKey = 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'nonqm';
+
+const RATE_COLORS: Record<RateKey, string> = {
+  conventional: '#3182CE',
+  fha: '#38A169',
+  va: '#DD6B20',
+  usda: '#805AD5',
+  jumbo: '#D53F8C',
+  nonqm: '#718096',
+};
+
+const RATE_LABELS: Record<RateKey, string> = {
+  conventional: 'Conv',
+  fha: 'FHA',
+  va: 'VA',
+  usda: 'USDA',
+  jumbo: 'Jumbo',
+  nonqm: 'Non-QM',
+};
+
 export default function HistoryScreen() {
   const [allData, setAllData] = useState<RateEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<TimeRange>('all');
+  const [selected, setSelected] = useState<Record<RateKey, boolean>>({
+    conventional: true, fha: true, va: true, usda: true, jumbo: true, nonqm: true,
+  });
 
   useEffect(() => {
     fetchHistory();
@@ -60,7 +83,7 @@ export default function HistoryScreen() {
   const tableData = useMemo(() => [...filteredData].reverse(), [filteredData]);
 
   const screenWidth = Dimensions.get('window').width;
-  const chartWidth = Math.max(screenWidth - 32, filteredData.length * 18);
+  const chartWidth = Math.min(screenWidth - 32, 568);
 
   // Build chart labels — show every 5th date
   const labels = filteredData.map((entry, i) => {
@@ -71,28 +94,28 @@ export default function HistoryScreen() {
     return '';
   });
 
-  // Only show USDA/Jumbo/Non-QM on chart once they have 10+ data points (avoids spike lines)
-  const usdaCount = filteredData.filter((e) => e.usda?.rate).length;
-  const jumboCount = filteredData.filter((e) => e.jumbo?.rate).length;
-  const nonqmCount = filteredData.filter((e) => e.nonqm?.rate).length;
-  const showUsda = usdaCount >= 10;
-  const showJumbo = jumboCount >= 10;
-  const showNonqm = nonqmCount >= 10;
+  // Check which extra types have enough data
+  const hasData: Record<RateKey, boolean> = {
+    conventional: true,
+    fha: true,
+    va: true,
+    usda: filteredData.filter((e) => e.usda?.rate).length >= 3,
+    jumbo: filteredData.filter((e) => e.jumbo?.rate).length >= 3,
+    nonqm: filteredData.filter((e) => e.nonqm?.rate).length >= 3,
+  };
 
-  const convRates = filteredData.map((e) => e.conventional?.rate ?? 0);
-  const fhaRates = filteredData.map((e) => e.fha?.rate ?? 0);
-  const vaRates = filteredData.map((e) => e.va?.rate ?? 0);
+  const toggleRate = (key: RateKey) => setSelected((p) => ({ ...p, [key]: !p[key] }));
 
-  // Find min/max for Y-axis — tight bounds with 0.125% padding
-  const coreRates = [...convRates, ...fhaRates, ...vaRates].filter((r) => r > 0);
-  const extraRateVals = [
-    ...(showUsda ? filteredData.map((e) => e.usda?.rate ?? 0).filter((r) => r > 0) : []),
-    ...(showJumbo ? filteredData.map((e) => e.jumbo?.rate ?? 0).filter((r) => r > 0) : []),
-    ...(showNonqm ? filteredData.map((e) => e.nonqm?.rate ?? 0).filter((r) => r > 0) : []),
-  ];
-  const allRates = [...coreRates, ...extraRateVals];
-  const dataMin = allRates.length > 0 ? Math.min(...allRates) : 5;
-  const dataMax = allRates.length > 0 ? Math.max(...allRates) : 7;
+  // Build datasets and Y-axis bounds based on selected types
+  const getRates = (key: RateKey) => filteredData.map((e) => {
+    const val = key === 'nonqm' ? e.nonqm?.rate : (e as any)[key]?.rate;
+    return val || 0;
+  });
+
+  const activeKeys = (Object.keys(selected) as RateKey[]).filter((k) => selected[k] && hasData[k]);
+  const activeRates = activeKeys.flatMap((k) => getRates(k).filter((r) => r > 0));
+  const dataMin = activeRates.length > 0 ? Math.min(...activeRates) : 5;
+  const dataMax = activeRates.length > 0 ? Math.max(...activeRates) : 7;
   const minRate = Math.floor((dataMin - 0.125) * 8) / 8;
   const maxRate = Math.ceil((dataMax + 0.125) * 8) / 8;
 
@@ -136,44 +159,32 @@ export default function HistoryScreen() {
       {hasData ? (
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Rate Trends</Text>
+          {/* Checkboxes to toggle rate types */}
           <View style={styles.legendRow}>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#3182CE' }]} />
-              <Text style={styles.legendLabel}>Conv</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#38A169' }]} />
-              <Text style={styles.legendLabel}>FHA</Text>
-            </View>
-            <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#DD6B20' }]} />
-              <Text style={styles.legendLabel}>VA</Text>
-            </View>
-            {showUsda && <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#805AD5' }]} />
-              <Text style={styles.legendLabel}>USDA</Text>
-            </View>}
-            {showJumbo && <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#D53F8C' }]} />
-              <Text style={styles.legendLabel}>Jumbo</Text>
-            </View>}
-            {showNonqm && <View style={styles.legendItem}>
-              <View style={[styles.legendDot, { backgroundColor: '#718096' }]} />
-              <Text style={styles.legendLabel}>Non-QM</Text>
-            </View>}
+            {(Object.keys(RATE_LABELS) as RateKey[]).filter((k) => hasData[k]).map((k) => (
+              <TouchableOpacity
+                key={k}
+                style={[styles.checkboxItem, selected[k] && { backgroundColor: RATE_COLORS[k] + '18' }]}
+                onPress={() => toggleRate(k)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.checkbox, selected[k] && { backgroundColor: RATE_COLORS[k], borderColor: RATE_COLORS[k] }]}>
+                  {selected[k] && <Text style={styles.checkmark}>✓</Text>}
+                </View>
+                <Text style={[styles.legendLabel, selected[k] && { color: RATE_COLORS[k], fontWeight: '700' }]}>{RATE_LABELS[k]}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+          {activeKeys.length > 0 && (
             <LineChart
               data={{
                 labels,
                 datasets: [
-                  { data: convRates, color: () => '#3182CE', strokeWidth: 2 },
-                  { data: fhaRates, color: () => '#38A169', strokeWidth: 2 },
-                  { data: vaRates, color: () => '#DD6B20', strokeWidth: 2 },
-                  ...(showUsda ? [{ data: filteredData.map((e) => e.usda?.rate || 0).map((v, i, a) => v || a.find(x => x > 0) || dataMin), color: () => '#805AD5', strokeWidth: 2 }] : []),
-                  ...(showJumbo ? [{ data: filteredData.map((e) => e.jumbo?.rate || 0).map((v, i, a) => v || a.find(x => x > 0) || dataMin), color: () => '#D53F8C', strokeWidth: 2 }] : []),
-                  ...(showNonqm ? [{ data: filteredData.map((e) => e.nonqm?.rate || 0).map((v, i, a) => v || a.find(x => x > 0) || dataMin), color: () => '#718096', strokeWidth: 2 }] : []),
-                  // Invisible datasets to force Y-axis bounds
+                  ...activeKeys.map((k) => ({
+                    data: getRates(k).map((v) => v || dataMin),
+                    color: () => RATE_COLORS[k],
+                    strokeWidth: 2,
+                  })),
                   { data: [minRate], color: () => 'transparent', strokeWidth: 0, withDots: false },
                   { data: [maxRate], color: () => 'transparent', strokeWidth: 0, withDots: false },
                 ],
@@ -201,7 +212,10 @@ export default function HistoryScreen() {
               withOuterLines={false}
               segments={5}
             />
-          </ScrollView>
+          )}
+          {activeKeys.length === 0 && (
+            <Text style={styles.noData}>Select at least one rate type above.</Text>
+          )}
         </View>
       ) : (
         <View style={styles.card}>
@@ -399,6 +413,28 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
+  },
+  checkboxItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
   },
   legendLabel: {
     fontSize: 13,
