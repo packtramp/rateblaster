@@ -232,6 +232,12 @@ export default function HistoryScreen() {
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
+      {/* Header */}
+      <View style={s.header}>
+        <Text style={s.logo}>RateBlaster</Text>
+        <Text style={s.tagline}>Daily Mortgage Rates, Delivered.</Text>
+      </View>
+
       {/* Range Toggle */}
       <View style={s.toggleRow}>
         {([
@@ -353,6 +359,9 @@ export default function HistoryScreen() {
 const s = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { paddingBottom: 40 },
+  header: { backgroundColor: Colors.primary, paddingTop: Platform.OS === 'web' ? 60 : 80, paddingBottom: 40, paddingHorizontal: 24, alignItems: 'center' },
+  logo: { fontSize: 36, fontWeight: '800', color: Colors.textLight, letterSpacing: 1 },
+  tagline: { fontSize: 16, color: Colors.accent, marginTop: 8, fontWeight: '500' },
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
   loadingText: { marginTop: 12, fontSize: 15, color: Colors.textSecondary },
   toggleRow: { flexDirection: 'row', justifyContent: 'center', paddingVertical: 16, gap: 8, flexWrap: 'wrap' },
