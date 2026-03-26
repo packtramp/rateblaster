@@ -23,6 +23,10 @@ export default function RootLayout() {
           options={{ title: 'Rate History' }}
         />
         <Stack.Screen
+          name="calculator"
+          options={{ title: 'Mortgage Calculator' }}
+        />
+        <Stack.Screen
           name="unsubscribe"
           options={{ title: 'Unsubscribe' }}
         />

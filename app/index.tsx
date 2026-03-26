@@ -347,6 +347,15 @@ export default function HomeScreen() {
         <Text style={styles.historyButtonText}>View Rate History</Text>
       </TouchableOpacity>
 
+      {/* Mortgage Calculator Button */}
+      <TouchableOpacity
+        style={[styles.historyButton, { backgroundColor: '#DD6B20', marginTop: 8 }]}
+        onPress={() => router.push('/calculator')}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.historyButtonText}>Mortgage Calculator</Text>
+      </TouchableOpacity>
+
       {/* Footer */}
       <View style={styles.footer}>
         <Text style={styles.footerText}>
