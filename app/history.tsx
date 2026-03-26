@@ -175,10 +175,13 @@ export default function HistoryScreen() {
 
   const filteredData = useMemo(() => {
     if (range === 'all') return allData;
-    if (range === '10') return allData.slice(-10);
-    if (range === '30') return allData.slice(-30);
-    if (range === '60') return allData.slice(-60);
-    if (range === '90') return allData.slice(-90);
+    if (range === '10' || range === '30' || range === '60' || range === '90') {
+      const days = parseInt(range);
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - days);
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+      return allData.filter((e) => e.date >= cutoffStr);
+    }
     if (range === 'q4prev') {
       const year = new Date().getFullYear();
       return allData.filter((e) => e.date >= `${year - 1}-10-01` && e.date <= `${year - 1}-12-31`);
