@@ -24,7 +24,7 @@ interface RateEntry {
   nonqm?: { rate: number; apr?: number };
 }
 
-type TimeRange = '30' | '60' | 'all';
+type TimeRange = '10' | 'q1' | 'q2' | 'q3' | 'q4' | 'ytd' | '6mo' | 'lastyear' | 'all';
 
 type RateKey = 'conventional' | 'fha' | 'va' | 'usda' | 'jumbo' | 'nonqm';
 
@@ -49,7 +49,7 @@ const RATE_LABELS: Record<RateKey, string> = {
 export default function HistoryScreen() {
   const [allData, setAllData] = useState<RateEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<TimeRange>('all');
+  const [range, setRange] = useState<TimeRange>('ytd');
   const [selected, setSelected] = useState<Record<RateKey, boolean>>({
     conventional: true, fha: true, va: true, usda: true, jumbo: true, nonqm: true,
   });
@@ -76,8 +76,24 @@ export default function HistoryScreen() {
 
   const filteredData = useMemo(() => {
     if (range === 'all') return allData;
-    const days = range === '30' ? 30 : 60;
-    return allData.slice(-days);
+    if (range === '10') return allData.slice(-10);
+
+    const now = new Date();
+    const year = now.getFullYear();
+
+    const filterByDateRange = (start: string, end: string) =>
+      allData.filter((e) => e.date >= start && e.date <= end);
+
+    switch (range) {
+      case 'q1': return filterByDateRange(`${year}-01-01`, `${year}-03-31`);
+      case 'q2': return filterByDateRange(`${year}-04-01`, `${year}-06-30`);
+      case 'q3': return filterByDateRange(`${year}-07-01`, `${year}-09-30`);
+      case 'q4': return filterByDateRange(`${year}-10-01`, `${year}-12-31`);
+      case 'ytd': return filterByDateRange(`${year}-01-01`, `${year}-12-31`);
+      case '6mo': return allData.slice(-130); // ~6 months of weekday data
+      case 'lastyear': return filterByDateRange(`${year - 1}-01-01`, `${year - 1}-12-31`);
+      default: return allData;
+    }
   }, [allData, range]);
 
   const tableData = useMemo(() => [...filteredData].reverse(), [filteredData]);
@@ -135,28 +151,42 @@ export default function HistoryScreen() {
     );
   }
 
-  const hasData = filteredData.length > 1;
+  const hasChartData = filteredData.length > 1;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {/* Range Toggle */}
       <View style={styles.toggleRow}>
-        {(['30', '60', 'all'] as TimeRange[]).map((r) => (
+        {([
+          { key: '10' as TimeRange, label: '10 Day' },
+          { key: 'q1' as TimeRange, label: 'Q1' },
+          { key: 'q2' as TimeRange, label: 'Q2' },
+          { key: 'ytd' as TimeRange, label: 'YTD' },
+          { key: 'all' as TimeRange, label: 'All' },
+        ]).filter(({ key }) => {
+          // Only show ranges that have data
+          const now = new Date();
+          const year = now.getFullYear();
+          if (key === 'q2') return now.getMonth() >= 3; // April+
+          if (key === 'q3') return now.getMonth() >= 6;
+          if (key === 'q4') return now.getMonth() >= 9;
+          return true;
+        }).map(({ key, label }) => (
           <TouchableOpacity
-            key={r}
-            style={[styles.toggleButton, range === r && styles.toggleActive]}
-            onPress={() => setRange(r)}
+            key={key}
+            style={[styles.toggleButton, range === key && styles.toggleActive]}
+            onPress={() => setRange(key)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.toggleText, range === r && styles.toggleTextActive]}>
-              {r === 'all' ? 'All' : `${r} Days`}
+            <Text style={[styles.toggleText, range === key && styles.toggleTextActive]}>
+              {label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Chart */}
-      {hasData ? (
+      {hasChartData ? (
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Rate Trends</Text>
           {/* Checkboxes to toggle rate types */}
