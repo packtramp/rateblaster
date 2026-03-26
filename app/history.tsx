@@ -19,6 +19,9 @@ interface RateEntry {
   conventional?: { rate: number; apr?: number };
   fha?: { rate: number; apr?: number };
   va?: { rate: number; apr?: number };
+  usda?: { rate: number; apr?: number };
+  jumbo?: { rate: number; apr?: number };
+  nonqm?: { rate: number; apr?: number };
 }
 
 type TimeRange = '30' | '60' | 'all';
@@ -71,9 +74,12 @@ export default function HistoryScreen() {
   const convRates = filteredData.map((e) => e.conventional?.rate ?? 0);
   const fhaRates = filteredData.map((e) => e.fha?.rate ?? 0);
   const vaRates = filteredData.map((e) => e.va?.rate ?? 0);
+  const usdaRates = filteredData.map((e) => e.usda?.rate ?? 0);
+  const jumboRates = filteredData.map((e) => e.jumbo?.rate ?? 0);
+  const nonqmRates = filteredData.map((e) => e.nonqm?.rate ?? 0);
 
   // Find min/max for Y-axis
-  const allRates = [...convRates, ...fhaRates, ...vaRates].filter((r) => r > 0);
+  const allRates = [...convRates, ...fhaRates, ...vaRates, ...usdaRates, ...jumboRates, ...nonqmRates].filter((r) => r > 0);
   const minRate = allRates.length > 0 ? Math.floor(Math.min(...allRates) * 4) / 4 : 5;
   const maxRate = allRates.length > 0 ? Math.ceil(Math.max(...allRates) * 4) / 4 : 7;
 
@@ -130,6 +136,18 @@ export default function HistoryScreen() {
               <View style={[styles.legendDot, { backgroundColor: '#DD6B20' }]} />
               <Text style={styles.legendLabel}>VA</Text>
             </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#805AD5' }]} />
+              <Text style={styles.legendLabel}>USDA</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#D53F8C' }]} />
+              <Text style={styles.legendLabel}>Jumbo</Text>
+            </View>
+            <View style={styles.legendItem}>
+              <View style={[styles.legendDot, { backgroundColor: '#718096' }]} />
+              <Text style={styles.legendLabel}>Non-QM</Text>
+            </View>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={true}>
             <LineChart
@@ -139,6 +157,9 @@ export default function HistoryScreen() {
                   { data: convRates, color: () => '#3182CE', strokeWidth: 2 },
                   { data: fhaRates, color: () => '#38A169', strokeWidth: 2 },
                   { data: vaRates, color: () => '#DD6B20', strokeWidth: 2 },
+                  { data: usdaRates, color: () => '#805AD5', strokeWidth: 2 },
+                  { data: jumboRates, color: () => '#D53F8C', strokeWidth: 2 },
+                  { data: nonqmRates, color: () => '#718096', strokeWidth: 2 },
                 ],
               }}
               width={chartWidth}
@@ -160,7 +181,6 @@ export default function HistoryScreen() {
                 },
                 style: { borderRadius: 8 },
               }}
-              bezier
               style={styles.chart}
               withInnerLines={true}
               withOuterLines={false}
@@ -180,11 +200,16 @@ export default function HistoryScreen() {
         <Text style={styles.subtitle}>{filteredData.length} entries</Text>
 
         {/* Table Header */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+        <View>
         <View style={styles.tableHeader}>
           <Text style={[styles.tableHeaderCell, styles.dateCol]}>Date</Text>
           <Text style={[styles.tableHeaderCell, styles.rateCol]}>Conv</Text>
           <Text style={[styles.tableHeaderCell, styles.rateCol]}>FHA</Text>
           <Text style={[styles.tableHeaderCell, styles.rateCol]}>VA</Text>
+          <Text style={[styles.tableHeaderCell, styles.rateCol]}>USDA</Text>
+          <Text style={[styles.tableHeaderCell, styles.rateCol]}>Jumbo</Text>
+          <Text style={[styles.tableHeaderCell, styles.rateCol]}>Non-QM</Text>
         </View>
 
         {/* Table Rows */}
@@ -227,9 +252,38 @@ export default function HistoryScreen() {
               >
                 {entry.va?.rate?.toFixed(3) ?? '—'}
               </Text>
+              <Text
+                style={[
+                  styles.tableCell,
+                  styles.rateCol,
+                  getRateChangeColor(entry.usda?.rate, prevEntry?.usda?.rate),
+                ]}
+              >
+                {entry.usda?.rate?.toFixed(3) ?? '—'}
+              </Text>
+              <Text
+                style={[
+                  styles.tableCell,
+                  styles.rateCol,
+                  getRateChangeColor(entry.jumbo?.rate, prevEntry?.jumbo?.rate),
+                ]}
+              >
+                {entry.jumbo?.rate?.toFixed(3) ?? '—'}
+              </Text>
+              <Text
+                style={[
+                  styles.tableCell,
+                  styles.rateCol,
+                  getRateChangeColor(entry.nonqm?.rate, prevEntry?.nonqm?.rate),
+                ]}
+              >
+                {entry.nonqm?.rate?.toFixed(3) ?? '—'}
+              </Text>
             </View>
           );
         })}
+        </View>
+        </ScrollView>
       </View>
     </ScrollView>
   );
@@ -352,6 +406,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: Colors.primary,
     paddingVertical: 10,
+    minWidth: 580,
   },
   tableHeaderCell: {
     fontSize: 13,
@@ -363,6 +418,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+    minWidth: 580,
   },
   tableRowAlt: {
     backgroundColor: '#f7fafc',

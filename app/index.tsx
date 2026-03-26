@@ -134,16 +134,14 @@ export default function HomeScreen() {
         createdAt: serverTimestamp(),
       }, { merge: true });
 
-      // Alert Roby if competitor signs up
-      if (isCompetitor) {
-        try {
-          await fetch('/api/alert', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: emailKey, name: name.trim(), domain: emailDomain }),
-          });
-        } catch {} // Silent — don't block signup
-      }
+      // Alert Roby on every signup
+      try {
+        await fetch('/api/alert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailKey, name: name.trim(), domain: emailDomain, isCompetitor }),
+        });
+      } catch {} // Silent — don't block signup
       setSubmitted(true);
     } catch (err) {
       setError('Something went wrong. Please try again.');
