@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
+  Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import {
@@ -347,10 +348,10 @@ export default function HomeScreen() {
         <Text style={styles.historyButtonText}>View Rate History</Text>
       </TouchableOpacity>
 
-      {/* Mortgage Calculator Button */}
+      {/* Mortgage Calculator Button — links to Dorsett Group site */}
       <TouchableOpacity
         style={[styles.historyButton, { backgroundColor: '#DD6B20', marginTop: 8 }]}
-        onPress={() => router.push('/calculator')}
+        onPress={() => Linking.openURL('https://www.dorsettgroup.com/mortgage-calculator.html')}
         activeOpacity={0.7}
       >
         <Text style={styles.historyButtonText}>Mortgage Calculator</Text>
