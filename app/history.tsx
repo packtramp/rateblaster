@@ -9,6 +9,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
+import { router } from 'expo-router';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Colors } from '../constants/colors';
@@ -124,24 +125,14 @@ export default function HistoryScreen() {
 
   const activeKeys = (Object.keys(selected) as RateKey[]).filter((k) => selected[k] && hasData[k]);
 
-  // Find the earliest index where ALL selected types have data
   const getVal = (e: RateEntry, key: RateKey) => key === 'nonqm' ? e.nonqm?.rate : (e as any)[key]?.rate;
-  const chartStartIdx = activeKeys.length > 0
-    ? filteredData.findIndex((e) => activeKeys.every((k) => getVal(e, k)))
-    : 0;
-  const chartEntries = chartStartIdx >= 0 ? filteredData.slice(chartStartIdx) : filteredData;
 
-  // Build chart labels from trimmed data
-  const chartLabels = chartEntries.map((entry, i) => {
-    if (i % Math.max(1, Math.floor(chartEntries.length / 6)) === 0) {
-      const parts = entry.date.split('-');
-      return `${parts[1]}/${parts[2]}`;
-    }
-    return '';
-  });
-
-  // Build datasets from trimmed data
-  const getRates = (key: RateKey) => chartEntries.map((e) => getVal(e, key) || 0);
+  // Each dataset fills missing leading values with first real value (flat line, no spike)
+  const getRates = (key: RateKey) => {
+    const raw = filteredData.map((e) => getVal(e, key) || 0);
+    const firstReal = raw.find((v) => v > 0) || 0;
+    return raw.map((v) => v > 0 ? v : firstReal);
+  };
 
   const activeRates = activeKeys.flatMap((k) => getRates(k).filter((r) => r > 0));
   const dataMin = activeRates.length > 0 ? Math.min(...activeRates) : 5;
@@ -222,7 +213,7 @@ export default function HistoryScreen() {
           {activeKeys.length > 0 && (
             <LineChart
               data={{
-                labels: chartLabels,
+                labels,
                 datasets: [
                   ...activeKeys.map((k) => ({
                     data: getRates(k).map((v) => v || dataMin),
