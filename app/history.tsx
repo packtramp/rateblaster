@@ -95,8 +95,8 @@ export default function HistoryScreen() {
   const allRates = [...coreRates, ...extraRates];
   const dataMin = allRates.length > 0 ? Math.min(...allRates) : 5;
   const dataMax = allRates.length > 0 ? Math.max(...allRates) : 7;
-  const minRate = Math.floor((dataMin - 0.25) * 8) / 8;
-  const maxRate = Math.ceil((dataMax + 0.25) * 8) / 8;
+  const minRate = Math.floor((dataMin - 0.125) * 8) / 8;
+  const maxRate = Math.ceil((dataMax + 0.125) * 8) / 8;
 
   function getRateChangeColor(current: number | undefined, previous: number | undefined) {
     if (!current || !previous || current === previous) return {};
