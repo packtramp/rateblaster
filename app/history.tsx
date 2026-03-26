@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, ActivityIndicator,
-  TouchableOpacity, Platform, Dimensions,
+  TouchableOpacity, Platform, Dimensions, Linking,
 } from 'react-native';
 import { router } from 'expo-router';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
@@ -287,10 +287,18 @@ export default function HistoryScreen() {
         )}
       </View>
 
-      {/* Back Button */}
-      <TouchableOpacity style={s.backButton} onPress={() => router.push('/')} activeOpacity={0.7}>
-        <Text style={s.backButtonText}>← Back to Home</Text>
-      </TouchableOpacity>
+      {/* Action Buttons */}
+      <View style={s.buttonCard}>
+        <TouchableOpacity style={s.signupButton} onPress={() => router.push('/')} activeOpacity={0.7}>
+          <Text style={s.signupButtonText}>Sign Up for Rates</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.calcButton} onPress={() => Linking.openURL('https://www.dorsettgroup.com/mortgage-calculator.html')} activeOpacity={0.7}>
+          <Text style={s.calcButtonText}>Mortgage Calculator</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={s.applyButton} onPress={() => Linking.openURL('https://roby.zipforhome.com/')} activeOpacity={0.7}>
+          <Text style={s.applyButtonText}>Apply Now</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Data Table */}
       <View style={s.card}>
@@ -367,10 +375,19 @@ const s = StyleSheet.create({
   checkmark: { color: '#fff', fontSize: 12, fontWeight: '700' },
   legendLabel: { fontSize: 13, color: Colors.text, fontWeight: '500' },
   noData: { fontSize: 15, color: Colors.textSecondary, textAlign: 'center', paddingVertical: 24, fontStyle: 'italic' },
-  backButton: { marginHorizontal: 16, marginTop: 16, paddingVertical: 12, alignItems: 'center',
-    ...Platform.select({ web: { maxWidth: 600, alignSelf: 'center' as const, width: '100%' }, default: {} }),
+  buttonCard: {
+    backgroundColor: Colors.surface, marginHorizontal: 16, marginTop: 16, borderRadius: 12, padding: 24, gap: 10,
+    ...Platform.select({
+      web: { maxWidth: 600, alignSelf: 'center' as const, width: '100%', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 12 },
+      default: { elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 8 },
+    }),
   },
-  backButtonText: { fontSize: 15, fontWeight: '600', color: Colors.primary },
+  signupButton: { borderWidth: 2, borderColor: Colors.accent, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
+  signupButtonText: { color: Colors.accent, fontSize: 16, fontWeight: '700' },
+  calcButton: { backgroundColor: Colors.accent, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
+  calcButtonText: { color: Colors.textLight, fontSize: 16, fontWeight: '700' },
+  applyButton: { backgroundColor: Colors.success, borderRadius: 8, paddingVertical: 14, alignItems: 'center' },
+  applyButtonText: { color: Colors.textLight, fontSize: 16, fontWeight: '700' },
   tableHeader: { flexDirection: 'row', borderBottomWidth: 2, borderBottomColor: Colors.primary, paddingVertical: 10, minWidth: 580 },
   tableHeaderCell: { fontSize: 13, fontWeight: '700', color: Colors.primary },
   tableRow: { flexDirection: 'row', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Colors.border, minWidth: 580 },
