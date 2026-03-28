@@ -140,7 +140,7 @@ export default function HomeScreen() {
         await fetch('/api/alert', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: emailKey, name: name.trim(), domain: emailDomain, isCompetitor }),
+          body: JSON.stringify({ email: emailKey, name: name.trim(), phone: phone.trim(), domain: emailDomain, isCompetitor, rateTypes: selectedTypes }),
         });
       } catch {} // Silent — don't block signup
       setSubmitted(true);
