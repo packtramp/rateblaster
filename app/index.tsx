@@ -114,15 +114,33 @@ export default function HomeScreen() {
       const emailKey = email.trim().toLowerCase();
       const emailDomain = emailKey.split('@')[1] || '';
 
-      // Competitor domains to flag
+      // Competitor detection: exact domains + keyword patterns
       const COMPETITOR_DOMAINS = [
+        // National lenders
         'rocketmortgage.com', 'quickenloans.com', 'uwm.com', 'unitedwholesale.com',
-        'loanDepot.com', 'loandepot.com', 'wellsfargo.com', 'chase.com', 'bankofamerica.com',
+        'loandepot.com', 'wellsfargo.com', 'chase.com', 'bankofamerica.com',
         'caliberhomeloans.com', 'pennymac.com', 'freedommortgage.com', 'newrez.com',
-        'flagstar.com', 'crosscountry.com', 'Movement.com', 'movement.com',
-        'fairwaymc.com', 'guildmortgage.com', 'homepoint.com',
+        'flagstar.com', 'crosscountrymortgage.com', 'movement.com',
+        'fairwayindependentmc.com', 'guildmortgage.com', 'homepoint.com',
+        'rate.com', 'mrcooper.com', 'dhimortgage.com', 'lennarmortgage.com',
+        'citizensbank.com', 'pnc.com', 'truist.com', 'usbank.com',
+        'amerihome.com', 'guaranteed-rate.com', 'primeres.com',
+        'carringtonmortgage.com', 'nationstar.com',
+        // Huntsville / local
+        'midtownmtg.com', 'riverbankandtrust.com', 'assurancemortgage.com',
+        'planethomelending.com', 'regions.com', 'capitalhomemortgage.com',
+        'northalabamamortgage.com', 'dsldmortgage.com', 'redfcu.org',
+        'alabamacu.com', 'avadiancu.com', 'ucbi.com', 'bryantbank.com',
+        'nova.bank', 'mylocal.bank', 'cbsbank.com', 'cadencebank.com',
+        'bankindependent.com', 'worthingtonmortgage.com', 'hometownlenders.com',
+        'cishomeloans.com', 'supremelending.com', '1stfamilymortgage.com',
       ];
-      const isCompetitor = COMPETITOR_DOMAINS.some(d => emailDomain.toLowerCase() === d.toLowerCase());
+      // Keyword patterns — flag if domain contains any of these
+      const COMPETITOR_KEYWORDS = ['mortgage', 'loan', 'lender', 'lending', 'rate', 'bank', 'credit'];
+      const domainLower = emailDomain.toLowerCase();
+      const domainBase = domainLower.split('.')[0]; // e.g., 'rocketmortgage' from 'rocketmortgage.com'
+      const isCompetitor = COMPETITOR_DOMAINS.some(d => domainLower === d) ||
+        COMPETITOR_KEYWORDS.some(kw => domainBase.includes(kw));
 
       await setDoc(doc(db, 'subscribers', emailKey), {
         name: name.trim(),
